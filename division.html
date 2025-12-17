@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Division Quest</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 50%, #43e97b 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(255,255,255,0.95);
+            color: #4facfe;
+            padding: 12px 24px;
+            border-radius: 15px;
+            text-decoration: none;
+            font-weight: 700;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.3);
+            max-width: 700px;
+            width: 100%;
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(79, 172, 254, 0.1) 0%, transparent 70%);
+            animation: float 8s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            50% { transform: translate(-30px, -30px) rotate(180deg); }
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        @keyframes celebration {
+            0% { transform: scale(0) rotate(0deg); opacity: 0; }
+            50% { transform: scale(1.2) rotate(180deg); opacity: 1; }
+            100% { transform: scale(0) rotate(360deg); opacity: 0; }
+        }
+        
+        h1 {
+            font-size: 3rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+            margin-bottom: 10px;
+            animation: slideUp 0.6s ease-out;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+            animation: slideUp 0.6s ease-out 0.1s both;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+            animation: slideUp 0.6s ease-out 0.2s both;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            color: white;
+            box-shadow: 0 10px 30px rgba(79, 172, 254, 0.3);
+            transition: transform 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 900;
+            display: block;
+        }
+        
+        .stat-label {
+            font-size: 0.75rem;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .progress-bar {
+            height: 20px;
+            background: #e0e0e0;
+            border-radius: 20px;
+            overflow: hidden;
+            margin-bottom: 30px;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 0.75rem;
+        }
+        
+        .question-area {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            border-radius: 25px;
+            padding: 40px;
+            margin-bottom: 25px;
+            text-align: center;
+            box-shadow: 0 15px 40px rgba(168, 237, 234, 0.4);
+            animation: scaleIn 0.5s ease-out;
+        }
+        
+        .question {
+            font-size: 5rem;
+            font-weight: 900;
+            color: #2d3436;
+            margin: 20px 0;
+            text-shadow: 2px 2px 0 rgba(255,255,255,0.5);
+        }
+        
+        .visual-division {
+            margin: 30px 0;
+            min-height: 120px;
+        }
+        
+        .division-explanation {
+            background: rgba(255, 255, 255, 0.6);
+            padding: 15px;
+            border-radius: 15px;
+            margin: 20px 0;
+            font-size: 1rem;
+            color: #2d3436;
+            border: 2px dashed rgba(0,0,0,0.2);
+        }
+        
+        .group-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .group {
+            background: rgba(255, 255, 255, 0.5);
+            border: 3px solid #4facfe;
+            border-radius: 15px;
+            padding: 12px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            max-width: 250px;
+            animation: scaleIn 0.4s ease-out backwards;
+        }
+        
+        .object-item {
+            width: 35px;
+            height: 35px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            animation: scaleIn 0.3s ease-out backwards;
+        }
+        
+        input[type="number"] {
+            width: 150px;
+            font-size: 3rem;
+            font-weight: 900;
+            text-align: center;
+            padding: 15px;
+            border: 4px solid #4facfe;
+            border-radius: 20px;
+            margin: 20px auto;
+            display: block;
+            transition: all 0.3s ease;
+        }
+        
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #00f2fe;
+            box-shadow: 0 0 0 4px rgba(79, 172, 254, 0.2);
+            transform: scale(1.05);
+        }
+        
+        .btn {
+            padding: 18px 40px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            width: 100%;
+            margin: 10px 0;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(79, 172, 254, 0.4);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            color: white;
+        }
+        
+        .btn-success:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(67, 233, 123, 0.4);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .difficulty-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 25px 0;
+        }
+        
+        .difficulty-btn {
+            padding: 25px 20px;
+            border: 3px solid #e0e0e0;
+            background: white;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+        
+        .difficulty-btn:hover {
+            border-color: #4facfe;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(79, 172, 254, 0.2);
+        }
+        
+        .difficulty-btn.active {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border-color: transparent;
+        }
+        
+        .difficulty-emoji {
+            font-size: 2.5rem;
+            display: block;
+            margin-bottom: 10px;
+        }
+        
+        .feedback {
+            padding: 25px;
+            border-radius: 20px;
+            margin-top: 20px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            text-align: center;
+            animation: scaleIn 0.5s ease-out;
+        }
+        
+        .feedback.correct {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            color: #0a6e3f;
+            border: 3px solid #0a6e3f;
+        }
+        
+        .feedback.incorrect {
+            background: linear-gradient(135deg, #fab1a0 0%, #ff7675 100%);
+            color: #d63031;
+            border: 3px solid #d63031;
+        }
+        
+        .celebration-emoji {
+            position: fixed;
+            font-size: 5rem;
+            z-index: 1000;
+            pointer-events: none;
+            animation: celebration 1.5s ease-out;
+        }
+        
+        .start-screen, .end-screen {
+            text-align: center;
+            animation: slideUp 0.6s ease-out;
+        }
+        
+        .start-screen p {
+            font-size: 1.2rem;
+            color: #666;
+            line-height: 1.8;
+            margin: 20px 0;
+        }
+        
+        .trophy {
+            font-size: 6rem;
+            display: block;
+            margin: 20px 0;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        .final-score {
+            font-size: 5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 20px 0;
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-button">← Back to Home</a>
+    
+    <div class="container">
+        <!-- Start Screen -->
+        <div id="startScreen" class="start-screen">
+            <h1>➗ Division Quest</h1>
+            <p class="subtitle">Master division and share your skills!</p>
+            <p>Division is about sharing or grouping equally. Choose your difficulty and answer 10 questions! 🧮</p>
+            
+            <div class="difficulty-grid">
+                <button class="difficulty-btn active" data-level="easy">
+                    <span class="difficulty-emoji">🌊</span>
+                    Easy<br>
+                    <small>÷2 to ÷5</small>
+                </button>
+                <button class="difficulty-btn" data-level="medium">
+                    <span class="difficulty-emoji">🌀</span>
+                    Medium<br>
+                    <small>÷2 to ÷10</small>
+                </button>
+                <button class="difficulty-btn" data-level="hard">
+                    <span class="difficulty-emoji">🌊</span>
+                    Hard<br>
+                    <small>÷2 to ÷12</small>
+                </button>
+            </div>
+            
+            <button class="btn btn-primary" onclick="startGame()">🌊 Start Quest</button>
+        </div>
+        
+        <!-- Game Screen -->
+        <div id="gameScreen" class="hidden">
+            <h1>🎯 Level <span id="currentLevel">1</span></h1>
+            <p class="subtitle">Solve the division problem!</p>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill">0 / 10</div>
+            </div>
+            
+            <div class="stats">
+                <div class="stat-card">
+                    <span class="stat-value" id="score">0</span>
+                    <span class="stat-label">Score</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value" id="correct">0</span>
+                    <span class="stat-label">Correct</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value" id="answered">0</span>
+                    <span class="stat-label">Answered</span>
+                </div>
+            </div>
+            
+            <div class="question-area">
+                <div class="question" id="question">12 ÷ 3 = ?</div>
+                <div class="division-explanation" id="explanation">
+                    Share 12 items equally among 3 groups
+                </div>
+                <div class="visual-division" id="visualDivision"></div>
+                <input type="number" id="answerInput" placeholder="?" autofocus>
+                <button class="btn btn-success" onclick="checkAnswer()" id="checkBtn">Check Answer ✓</button>
+                <div id="feedback" class="feedback hidden"></div>
+                <button class="btn btn-primary hidden" onclick="nextQuestion()" id="nextBtn">Next Question →</button>
+            </div>
+        </div>
+        
+        <!-- End Screen -->
+        <div id="endScreen" class="hidden end-screen">
+            <span class="trophy">🏆</span>
+            <h1>Quest Complete!</h1>
+            <div class="final-score" id="finalPercentage">100%</div>
+            <p class="subtitle" id="finalMessage">You're a Division Master!</p>
+            
+            <div class="stats">
+                <div class="stat-card">
+                    <span class="stat-value" id="finalCorrect">0</span>
+                    <span class="stat-label">Correct</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value">10</span>
+                    <span class="stat-label">Total</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value" id="finalScore">0</span>
+                    <span class="stat-label">Score</span>
+                </div>
+            </div>
+            
+            <button class="btn btn-primary" onclick="resetGame()">🔄 Play Again</button>
+            <a href="index.html" class="btn btn-primary" style="display:block;text-align:center;text-decoration:none;margin-top:10px;">← Back to Home</a>
+        </div>
+    </div>
+
+    <script>
+        let difficulty = 'easy';
+        let currentDividend, currentDivisor, correctAnswer;
+        let questionsAnswered = 0, correctAnswers = 0, score = 0;
+        const totalQuestions = 10;
+        
+        const ranges = {
+            easy: { min: 2, max: 5 },
+            medium: { min: 2, max: 10 },
+            hard: { min: 2, max: 12 }
+        };
+        
+        document.querySelectorAll('.difficulty-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                difficulty = btn.dataset.level;
+            });
+        });
+        
+        function startGame() {
+            document.getElementById('startScreen').classList.add('hidden');
+            document.getElementById('gameScreen').classList.remove('hidden');
+            questionsAnswered = 0;
+            correctAnswers = 0;
+            score = 0;
+            updateStats();
+            generateQuestion();
+        }
+        
+        function generateQuestion() {
+            const range = ranges[difficulty];
+            currentDivisor = Math.floor(Math.random() * (range.max - range.min + 1)) + range.min;
+            correctAnswer = Math.floor(Math.random() * 10) + 1;
+            currentDividend = currentDivisor * correctAnswer;
+            
+            document.getElementById('question').textContent = `${currentDividend} ÷ ${currentDivisor} = ?`;
+            document.getElementById('explanation').textContent = `Share ${currentDividend} items equally among ${currentDivisor} groups`;
+            document.getElementById('answerInput').value = '';
+            document.getElementById('feedback').classList.add('hidden');
+            document.getElementById('nextBtn').classList.add('hidden');
+            document.getElementById('checkBtn').classList.remove('hidden');
+            document.getElementById('answerInput').disabled = false;
+            document.getElementById('answerInput').focus();
+            
+            createVisualDivision();
+        }
+        
+        function createVisualDivision() {
+            const visual = document.getElementById('visualDivision');
+            visual.innerHTML = '';
+            
+            if (currentDividend <= 30) {
+                const groupContainer = document.createElement('div');
+                groupContainer.className = 'group-container';
+                
+                for (let i = 0; i < currentDivisor; i++) {
+                    const group = document.createElement('div');
+                    group.className = 'group';
+                    group.style.animationDelay = `${i * 0.1}s`;
+                    
+                    for (let j = 0; j < correctAnswer; j++) {
+                        const item = document.createElement('div');
+                        item.className = 'object-item';
+                        item.textContent = '🔵';
+                        item.style.animationDelay = `${(i * correctAnswer + j) * 0.05}s`;
+                        group.appendChild(item);
+                    }
+                    
+                    groupContainer.appendChild(group);
+                }
+                
+                visual.appendChild(groupContainer);
+                
+                const hint = document.createElement('div');
+                hint.style.marginTop = '15px';
+                hint.style.fontSize = '0.9rem';
+                hint.style.color = '#666';
+                hint.textContent = `Each group has the same number of items!`;
+                visual.appendChild(hint);
+            } else {
+                visual.innerHTML = '<p style="color: #666; font-size: 1.2rem;">How many in each group? 🤔</p>';
+            }
+        }
+        
+        function checkAnswer() {
+            const userAnswer = parseInt(document.getElementById('answerInput').value);
+            if (isNaN(userAnswer)) return;
+            
+            questionsAnswered++;
+            document.getElementById('answerInput').disabled = true;
+            document.getElementById('checkBtn').classList.add('hidden');
+            
+            const feedback = document.getElementById('feedback');
+            feedback.classList.remove('hidden');
+            
+            if (userAnswer === correctAnswer) {
+                correctAnswers++;
+                score += 10;
+                feedback.className = 'feedback correct';
+                feedback.innerHTML = '🎉 Perfect! You divided it correctly!';
+                createCelebration();
+            } else {
+                feedback.className = 'feedback incorrect';
+                feedback.innerHTML = `💪 Not quite! ${currentDividend} ÷ ${currentDivisor} = ${correctAnswer}<br><small>Think: ${currentDivisor} groups with ${correctAnswer} in each!</small>`;
+            }
+            
+            updateStats();
+            
+            if (questionsAnswered >= totalQuestions) {
+                setTimeout(showResults, 2000);
+            } else {
+                document.getElementById('nextBtn').classList.remove('hidden');
+            }
+        }
+        
+        function nextQuestion() {
+            generateQuestion();
+        }
+        
+        function updateStats() {
+            document.getElementById('score').textContent = score;
+            document.getElementById('correct').textContent = correctAnswers;
+            document.getElementById('answered').textContent = questionsAnswered;
+            document.getElementById('currentLevel').textContent = questionsAnswered + 1;
+            
+            const percentage = (questionsAnswered / totalQuestions) * 100;
+            document.getElementById('progressFill').style.width = percentage + '%';
+            document.getElementById('progressFill').textContent = `${questionsAnswered} / ${totalQuestions}`;
+        }
+        
+        function createCelebration() {
+            const emojis = ['🎉', '💧', '🌊', '✨', '🎊', '🏆'];
+            for (let i = 0; i < 6; i++) {
+                setTimeout(() => {
+                    const emoji = document.createElement('div');
+                    emoji.className = 'celebration-emoji';
+                    emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                    emoji.style.left = Math.random() * window.innerWidth + 'px';
+                    emoji.style.top = Math.random() * window.innerHeight + 'px';
+                    document.body.appendChild(emoji);
+                    setTimeout(() => emoji.remove(), 1500);
+                }, i * 100);
+            }
+        }
+        
+        function showResults() {
+            document.getElementById('gameScreen').classList.add('hidden');
+            document.getElementById('endScreen').classList.remove('hidden');
+            
+            const percentage = (correctAnswers / totalQuestions) * 100;
+            document.getElementById('finalPercentage').textContent = percentage.toFixed(0) + '%';
+            document.getElementById('finalCorrect').textContent = correctAnswers;
+            document.getElementById('finalScore').textContent = score;
+            
+            let message = '';
+            if (percentage === 100) message = '🏆 PERFECT! You\'re a Division Champion!';
+            else if (percentage >= 80) message = '🌟 Excellent Work!';
+            else if (percentage >= 60) message = '💪 Great Job!';
+            else message = '🌊 Keep Practicing!';
+            
+            document.getElementById('finalMessage').textContent = message;
+            
+            // Save stats to localStorage
+            saveStats();
+        }
+        
+        function saveStats() {
+            const stats = JSON.parse(localStorage.getItem('mathQuestStats') || '{"gamesPlayed":0,"questionsSolved":0,"totalScore":0,"correctAnswers":0}');
+            stats.gamesPlayed += 1;
+            stats.questionsSolved += questionsAnswered;
+            stats.totalScore += score;
+            stats.correctAnswers += correctAnswers;
+            localStorage.setItem('mathQuestStats', JSON.stringify(stats));
+        }
+        
+        function resetGame() {
+            document.getElementById('endScreen').classList.add('hidden');
+            document.getElementById('startScreen').classList.remove('hidden');
+        }
+        
+        document.getElementById('answerInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !document.getElementById('checkBtn').classList.contains('hidden')) {
+                checkAnswer();
+            }
+        });
+    </script>
+</body>
+</html>
